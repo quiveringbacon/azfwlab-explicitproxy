@@ -1,4 +1,4 @@
-# Azure firewall lab with explicit proxy
+# Azure Firewall lab with explicit proxy
 
 This creates a resource group, a hub vnet with an Azure firewall with explicit proxy set and a spoke vnet peered to the hub vnet. A storage account is also created to host .PAC file for the firewall to access. This creates a log analytics workspace and diagnostic settings for the firewall logs. Also creates Windows VM's in the default subnets with your public ip added to an NSG allowing RDP access and the PAC file set for the proxy. This also creates a logic app that will delete the resource group in 24hrs. You'll be prompted for the resource group name, location where you want the resources created, your public ip and username and password to use for the VM's.
 
