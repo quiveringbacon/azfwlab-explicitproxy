@@ -187,7 +187,7 @@ TEMPLATE
 
 #log analytics workspace
 resource "azurerm_log_analytics_workspace" "LAW" {
-  name                = "LAW-01"
+  name                = "LAW-${random_pet.name.id}"
   location            = azurerm_resource_group.RG.location
   resource_group_name = azurerm_resource_group.RG.name
   
@@ -737,4 +737,5 @@ resource "azurerm_virtual_machine_extension" "setspokePAC" {
   }
   
 }
+
 
