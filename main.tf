@@ -432,8 +432,8 @@ resource "azurerm_storage_account" "storageacct" {
 }
 
 resource "azurerm_storage_container" "container1" {
-  name                  = "container1"
-  storage_account_name  = azurerm_storage_account.storageacct.name
+  name                  = "container1"  
+  storage_account_id	= azurerm_storage_account.storageacct.id
   container_access_type = "private"
 }
 
@@ -737,5 +737,6 @@ resource "azurerm_virtual_machine_extension" "setspokePAC" {
   }
   
 }
+
 
 
