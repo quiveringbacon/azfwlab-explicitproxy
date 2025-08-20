@@ -560,7 +560,7 @@ resource "azurerm_firewall" "azfw" {
 }
 #firewall logging
 resource "azurerm_monitor_diagnostic_setting" "fwlogs"{
-  name = "fwlogs"
+  name = "fwlogs-${random_pet.name.id}"
   target_resource_id = azurerm_firewall.azfw.id
   log_analytics_workspace_id = azurerm_log_analytics_workspace.LAW.id
   log_analytics_destination_type = "Dedicated"
@@ -673,7 +673,7 @@ resource "azurerm_virtual_machine_extension" "sethubPAC" {
   virtual_machine_id         = azurerm_windows_virtual_machine.hubvm.id
   settings = <<SETTINGS
     {
-      "commandToExecute": "powershell -command \"Set-ItemProperty -Path 'HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\Connections' -name DefaultConnectionSettings -Value ([byte[]](0x46,0x00,0x00,0x00,0x0d,0x00,0x00,0x00,0x09,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x20,0x00,0x00,0x00,0x68,0x74,0x74,0x70,0x3a,0x2f,0x2f,0x31,0x30,0x2e,0x30,0x2e,0x32,0x2e,0x34,0x3a,0x34,0x33,0x32,0x31,0x2f,0x70,0x61,0x63,0x66,0x69,0x6c,0x65,0x2e,0x70,0x61,0x63,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00));Set-ItemProperty -Path 'HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings' -name AutoConfigURL -Value 'http://10.0.2.4:4321/pacfile.pac'; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\CurrentVersion\\Internet Settings' -name ProxySettingsPerUser -Value 0; Set-ItemProperty -Path 'HKLM:\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Internet Settings' -name AutoConfigURL -Value 'http://10.0.2.4:4321/pacfile.pac'\""
+      "commandToExecute": "powershell -command \"New-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\CurrentVersion\\Internet Settings' -name ProxySettingsPerUser -Value 0; $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-command \"New-ItemProperty -Path ''HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings'' -name AutoConfigURL -Value ''http://10.0.2.4:4321/pacfile.pac''; New-ItemProperty -Path ''HKLM:\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Internet Settings'' -name AutoConfigURL -Value ''http://10.0.2.4:4321/pacfile.pac''\"'; $trigger = New-ScheduledTaskTrigger -AtLogon; Register-ScheduledTask -TaskName 'test2task' -Action $action -Trigger $trigger -User ${var.D-username};Restart-Computer -Force\""
     }
   SETTINGS
   
@@ -723,10 +723,10 @@ resource "azurerm_virtual_machine_extension" "setspokePAC" {
   publisher                  = "Microsoft.Compute"
   type                       = "CustomScriptExtension"
   type_handler_version       = "1.10"
-  virtual_machine_id         = azurerm_windows_virtual_machine.spokevm.id
+  virtual_machine_id         = azurerm_windows_virtual_machine.spokevm.id  
   settings = <<SETTINGS
     {
-      "commandToExecute": "powershell -command \"Set-ItemProperty -Path 'HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\Connections' -name DefaultConnectionSettings -Value ([byte[]](0x46,0x00,0x00,0x00,0x0d,0x00,0x00,0x00,0x09,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x20,0x00,0x00,0x00,0x68,0x74,0x74,0x70,0x3a,0x2f,0x2f,0x31,0x30,0x2e,0x30,0x2e,0x32,0x2e,0x34,0x3a,0x34,0x33,0x32,0x31,0x2f,0x70,0x61,0x63,0x66,0x69,0x6c,0x65,0x2e,0x70,0x61,0x63,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00));Set-ItemProperty -Path 'HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings' -name AutoConfigURL -Value 'http://10.0.2.4:4321/pacfile.pac'; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\CurrentVersion\\Internet Settings' -name ProxySettingsPerUser -Value 0; Set-ItemProperty -Path 'HKLM:\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Internet Settings' -name AutoConfigURL -Value 'http://10.0.2.4:4321/pacfile.pac'\""
+      "commandToExecute": "powershell -command \"New-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\CurrentVersion\\Internet Settings' -name ProxySettingsPerUser -Value 0; $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-command \"New-ItemProperty -Path ''HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings'' -name AutoConfigURL -Value ''http://10.0.2.4:4321/pacfile.pac''; New-ItemProperty -Path ''HKLM:\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Internet Settings'' -name AutoConfigURL -Value ''http://10.0.2.4:4321/pacfile.pac''\"'; $trigger = New-ScheduledTaskTrigger -AtLogon; Register-ScheduledTask -TaskName 'test2task' -Action $action -Trigger $trigger -User ${var.D-username};Restart-Computer -Force\""
     }
   SETTINGS
   timeouts {
